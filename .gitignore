@@ -1,0 +1,22 @@
+# Go
+api/bin/
+api/tmp/
+
+# Node
+nextjs/node_modules/
+nextjs/.next/
+nextjs/out/
+
+# Env
+.env
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
