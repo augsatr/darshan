@@ -6,11 +6,15 @@ import { fetchTemples } from "@/lib/api";
 import TempleCard from "./TempleCard";
 import SearchFilters from "./SearchFilters";
 
-export default function TempleGallery() {
+interface GalleryProps {
+  initialState?: string;
+}
+
+export default function TempleGallery({ initialState = "" }: GalleryProps) {
   const [temples, setTemples] = useState<Temple[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [stateFilter, setStateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState(initialState);
   const [deityFilter, setDeityFilter] = useState("");
 
   useEffect(() => {

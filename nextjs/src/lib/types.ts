@@ -1,3 +1,11 @@
+export interface TempleImage {
+  id: number;
+  temple_id: number;
+  url: string;
+  alt: string;
+  sort_order: number;
+}
+
 export interface Temple {
   id: number;
   name: string;
@@ -17,6 +25,7 @@ export interface Temple {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+  images?: TempleImage[];
 }
 
 export interface User {

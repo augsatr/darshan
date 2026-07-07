@@ -6,6 +6,7 @@ import type { Temple, Review } from "@/lib/types";
 import { fetchReviews, createReview, addFavorite, removeFavorite, recordView } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import Viewer3D from "@/components/Viewer3D";
+import PhotoGallery from "@/components/PhotoGallery";
 
 export default function TempleDetailClient({ temple }: { temple: Temple }) {
   const { user } = useAuth();
@@ -108,6 +109,7 @@ export default function TempleDetailClient({ temple }: { temple: Temple }) {
             />
           </div>
         )}
+        {temple.images && temple.images.length > 1 && <PhotoGallery images={temple.images} />}
         <Viewer3D modelUrl={temple.model_url} name={temple.name} />
 
         <div className="grid md:grid-cols-3 gap-8">
