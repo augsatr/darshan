@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"darshan/api/internal/auth"
 	"darshan/api/internal/db"
 	"darshan/api/internal/handlers"
 	authmw "darshan/api/internal/middleware"
@@ -20,9 +21,14 @@ import (
 
 func cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -69,7 +75,11 @@ func main() {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Timeout(30 * time.Second))
 
-	h := handlers.New(d)
+	var rs *auth.RefreshStore
+	if d != nil {
+		rs = auth.NewRefreshStore(d.Pool)
+	}
+	h := handlers.New(d, rs)
 
 	r.Get("/health", h.Health)
 	r.With(cacheControl).Get("/temples", h.ListTemples)
@@ -77,6 +87,8 @@ func main() {
 
 	r.Post("/auth/signup", h.Signup)
 	r.Post("/auth/login", h.Login)
+	r.Post("/auth/refresh", h.RefreshToken)
+	r.Post("/auth/logout", h.Logout)
 
 	r.With(authmw.Auth).Get("/auth/me", h.Me)
 	r.With(authmw.Auth).Get("/favorites", h.ListFavorites)
