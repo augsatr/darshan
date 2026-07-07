@@ -18,6 +18,8 @@ const getTempleBySlug = `SELECT id, name, slug, state, city, deity, arch_style, 
 	is_published, created_at, updated_at
 FROM temples WHERE slug = $1`
 
+const listImages = `SELECT id, temple_id, url, alt, sort_order FROM images WHERE temple_id = $1 ORDER BY sort_order`
+
 func scanTemple(row pgx.Row) (models.Temple, error) {
 	var t models.Temple
 	err := row.Scan(
@@ -27,6 +29,24 @@ func scanTemple(row pgx.Row) (models.Temple, error) {
 		&t.VisitDuration, &t.IsPublished, &t.CreatedAt, &t.UpdatedAt,
 	)
 	return t, err
+}
+
+func (d *DB) fetchImages(ctx context.Context, templeID int64) ([]models.Image, error) {
+	rows, err := d.Query(ctx, listImages, templeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var images []models.Image
+	for rows.Next() {
+		var img models.Image
+		if err := rows.Scan(&img.ID, &img.TempleID, &img.URL, &img.Alt, &img.SortOrder); err != nil {
+			return nil, err
+		}
+		images = append(images, img)
+	}
+	return images, rows.Err()
 }
 
 func (d *DB) ListTemples(ctx context.Context) ([]models.Temple, error) {
@@ -54,6 +74,10 @@ func (d *DB) GetTempleBySlug(ctx context.Context, slug string) (*models.Temple, 
 			return nil, nil
 		}
 		return nil, err
+	}
+	images, err := d.fetchImages(ctx, t.ID)
+	if err == nil {
+		t.Images = images
 	}
 	return &t, nil
 }

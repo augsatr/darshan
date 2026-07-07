@@ -21,4 +21,5 @@ type Temple struct {
 	IsPublished    bool      `json:"is_published"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	Images         []Image   `json:"images"`
 }
